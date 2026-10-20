@@ -4,11 +4,18 @@ Build guide and code for the University of Maine F1TENTH car: a 1/10 RC car with
 
 **Start with the [wiki](https://github.com/StepLogic/f1tenth-umo/wiki):** parts list, chassis build, Jetson and VESC setup, then running exploration.
 
+## Build timelapse
+
+[![Build timelapse preview. Click to play the full video.](media/build-timelapse-preview.gif)](media/f1tenth_build_timelapse.mp4)
+
+The whole build in 2:36 ([full video, MP4](media/f1tenth_build_timelapse.mp4)). Step-by-step instructions are in the wiki, and every connection is on the [Wiring](https://github.com/StepLogic/f1tenth-umo/wiki/Wiring) page.
+
 ## Layout
 
 | Folder | Contents |
 |---|---|
 | `config/` | VESC motor config, parts list, WireGuard config examples |
+| `media/` | Build timelapse video and its preview, used by this README and the wiki |
 | `f1tenth_exploration/` | Autonomous exploration: launcher, explorer, Nav2/SLAM/EKF configs, calibration tools |
 | `remote_viz/` | Optional: RViz on your computer over WireGuard (Docker, ROS 2 Humble) |
 
