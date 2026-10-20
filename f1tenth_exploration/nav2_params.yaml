@@ -87,8 +87,13 @@ controller_server:
       movement_time_allowance: 10.0
     general_goal_checker:
       plugin: nav2_controller::SimpleGoalChecker
-      xy_goal_tolerance: 0.15
-      yaw_goal_tolerance: 0.15
+      # 0.30 m and any heading (were 0.15 m / 0.15 rad). Exploration goals are
+      # viewpoints, so the final heading does not matter, and an Ackermann car
+      # (0.94 m turn radius) cannot square up to within 8.6 deg near a goal:
+      # the 2026-10-19 14:37 run shuffled back and forth 38 m around one goal
+      # for 155 s and 15 m around another for 96 s, never "reaching" either.
+      xy_goal_tolerance: 0.30
+      yaw_goal_tolerance: 3.14
       stateful: true
     FollowPath:
       plugin: nav2_regulated_pure_pursuit_controller::RegulatedPurePursuitController
@@ -117,7 +122,8 @@ controller_server:
       approach_velocity_scaling_dist: 0.3
       max_angular_accel: 1.0
       use_interpolation: true
-      allow_reversing: false
+      # true (2026-10-17): follow the reverse segments Smac Hybrid-A* plans.
+      allow_reversing: true
       # Back ON. It is a real safety feature — slow down as costmap cost rises.
       # It previously dragged the request to 0.19 m/s, just under the ~0.20 m/s
       # (923 eRPM) at which this motor actually starts, so the car stood still
@@ -269,13 +275,43 @@ planner_server:
     use_sim_time: false
     expected_planner_frequency: 20.0
     planner_plugins: [GridBased]
+    # Smac Hybrid-A* (was NavFn, 2026-10-17). NavFn plans as if the car could
+    # turn on the spot, so it handed RPP paths an Ackermann car cannot follow:
+    # circling, nose-in stalls and "collision ahead" loops. Hybrid-A* only
+    # produces paths within the 0.94 m turning radius and, with Reeds-Shepp,
+    # can plan a 3-point turn out of a corner. The plugin keeps the name
+    # GridBased so the BT and frontier_explorer need no change.
     GridBased:
-      plugin: nav2_navfn_planner/NavfnPlanner
-      tolerance: 1.0
-      use_astar: true
+      plugin: nav2_smac_planner/SmacPlannerHybrid
+      # Plan on 6 cm cells: the 2 cm global costmap is too fine for
+      # Hybrid-A* over a 30 m map on the Jetson.
+      downsample_costmap: true
+      downsampling_factor: 3
+      tolerance: 0.25
       # Exploration goals sit on the edge of unknown space, so the planner has
       # to be allowed to route through it.
       allow_unknown: true
+      max_iterations: 1000000
+      max_on_approach_iterations: 1000
+      # 5.0 (was 1.5): the first plan after start-up builds the obstacle
+      # heuristic and took >1.5 s on the Jetson; later plans take ~0.1 s.
+      max_planning_time: 5.0
+      # REEDS_SHEPP allows reverse segments. Reversing is blind (the lidar has
+      # no view of the rear +-45 deg), so reverse_penalty makes it a last
+      # resort: only when no forward path exists.
+      motion_model_for_search: "REEDS_SHEPP"
+      reverse_penalty: 3.0
+      minimum_turning_radius: 0.94
+      angle_quantization_bins: 72
+      analytic_expansion_ratio: 3.5
+      analytic_expansion_max_length: 3.0
+      change_penalty: 0.0
+      non_straight_penalty: 1.2
+      cost_penalty: 2.0
+      retrospective_penalty: 0.015
+      lookup_table_size: 20.0
+      cache_obstacle_heuristic: true
+      smooth_path: true
 
 behavior_server:
   ros__parameters:

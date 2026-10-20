@@ -54,11 +54,14 @@ class CmdVelToAckermann(Node):
         # Below this the motor will not start: a VESC cannot reliably start a
         # sensorless motor at very low eRPM. MEASURED on this car with
         # speed_threshold.py: 0.15 m/s (692 eRPM) produced no motion at all,
-        # 0.20 m/s (923 eRPM) turned the wheels. 0.25 is one step of margin.
+        # 0.20 m/s (923 eRPM) turned the wheels. That was measured while the
+        # motor direction was inverted (the car was reversing). Re-measured
+        # FORWARD on 2026-10-17 with fwd_probe.py on the floor: 0.3 m/s stalled
+        # at 19 A, 0.4 m/s crept 0.13 m in 1 s, 0.5 m/s moved 0.52 m. 0.45 it is.
         # Any non-zero request below the floor is raised to it, so "go" always
         # means the car actually goes. RE-MEASURE for a different car, motor,
         # gearing or floor surface — do not inherit this number.
-        self.declare_parameter("min_move_speed", 0.25)      # m/s
+        self.declare_parameter("min_move_speed", 0.45)      # m/s
         self.declare_parameter("publish_rate", 20.0)        # Hz
         self.declare_parameter("cmd_timeout", 0.5)          # s before zeroing
 

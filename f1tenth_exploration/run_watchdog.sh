@@ -21,8 +21,8 @@ MINV="${2:-10.5}"
 LOG=/tmp/watchdog.log
 source /opt/ros/humble/setup.bash
 source "$HOME/f1tenth_ws/install/setup.bash"
-export ROS_DOMAIN_ID="${ROS_DOMAIN_ID:-42}"
-export ROS_LOCALHOST_ONLY="${ROS_LOCALHOST_ONLY:-1}"
+# same DDS settings as the stack, or the e-stop below cannot reach it
+source "$HOME/f1tenth_exploration/ros_net.sh"
 
 say() { echo "[$(date +%H:%M:%S)] $*" | tee -a "$LOG"; }
 : > "$LOG"

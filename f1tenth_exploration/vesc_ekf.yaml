@@ -3,7 +3,10 @@
 /**:
   ros__parameters:
     # erpm = speed_to_erpm_gain * speed (m/s) + speed_to_erpm_offset
-    speed_to_erpm_gain: 4614.0
+    # Negative: the motor is wired so positive eRPM drives the car BACKWARD
+    # (confirmed 2026-10-17 from lidar: forward commands grew the front range).
+    # The stack's own vesc.yaml got the same flip on 2026-08-25.
+    speed_to_erpm_gain: -4614.0
     speed_to_erpm_offset: 0.0
     # servo (0..1) = steering_angle_to_servo_gain * steering angle (rad) + offset
     steering_angle_to_servo_gain: -1.2135

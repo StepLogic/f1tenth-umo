@@ -17,7 +17,7 @@
 #   * The joystick has mux priority 100 vs Nav2's 10, so holding the deadman
 #     (button 4) overrides Nav2 completely. That is your e-stop, but it only
 #     works while the joystick is connected and bringup is alive.
-#   * Speed is capped in two independent places: desired_linear_vel (0.5 m/s)
+#   * Speed is capped in two independent places: desired_linear_vel (0.4 m/s)
 #     in nav2_params.yaml and max_speed (0.6 m/s) in cmd_vel_to_ackermann.py.
 #   * `--kill` tears the whole thing down and leaves the car stopped.
 #
@@ -42,9 +42,10 @@ VIDEO_PERIOD="${VIDEO_PERIOD:-1.0}"
 # "sequence size exceeds remaining buffer", and large topics like the costmaps
 # never getting through at all. The whole stack runs on the car, so confine DDS
 # to loopback and move off domain 0. Override if you really need off-board DDS.
-export ROS_DOMAIN_ID="${ROS_DOMAIN_ID:-42}"
-export ROS_LOCALHOST_ONLY="${ROS_LOCALHOST_ONLY:-1}"
-SETUP="export ROS_DOMAIN_ID=${ROS_DOMAIN_ID} && export ROS_LOCALHOST_ONLY=${ROS_LOCALHOST_ONLY} && source /opt/ros/humble/setup.bash && source ${WS}/install/setup.bash"
+# ros_net.sh keeps this (local) or, in wg mode, confines DDS to the WireGuard
+# tunnel instead so the PC can watch; see that file.
+source "${DIR}/ros_net.sh"
+SETUP="export ROS_DOMAIN_ID=${ROS_DOMAIN_ID} && export ROS_NET=${ROS_NET} && source ${DIR}/ros_net.sh && source /opt/ros/humble/setup.bash && source ${WS}/install/setup.bash"
 # Seconds to wait for the odom->base_link TF before starting Nav2. Launching the
 # costmaps without it makes them come up blind: no TF means the laser scan is
 # never raytraced into the costmap, so Nav2 sees no obstacles at all.
@@ -95,6 +96,7 @@ tmux has-session -t "${SESSION}" 2>/dev/null && die \
 mkdir -p "${BAG_DIR}"
 
 warn "AUTONOMOUS DRIVING. Car on the ground, clear area, joystick in hand."
+info "ros   -> ${ROS_NET}${CYCLONEDDS_URI:+ (${CYCLONEDDS_URI})}"
 info "bag   -> ${BAG_DIR}"
 info "video -> ${VIDEO_DIR}  (frames; encode with ffmpeg after copying off)"
 
