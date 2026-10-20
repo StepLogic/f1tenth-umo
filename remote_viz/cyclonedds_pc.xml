@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- ROS 2 over the WireGuard tunnel (ECE417 lab 03, section 8).
+     wg0 carries no multicast, so discovery is unicast to the listed peers.
+     Only wg0 is used, which keeps foreign LAN ROS machines out (as
+     ROS_LOCALHOST_ONLY=1 did). Traffic between processes on the same
+     machine goes to its own wg0 address and the kernel loops it back
+     locally, so it never passes through the tunnel. -->
+<CycloneDDS xmlns="https://cdds.io/config">
+  <Domain id="any">
+    <General>
+      <Interfaces>
+        <NetworkInterface name="wg0"/>
+      </Interfaces>
+      <AllowMulticast>false</AllowMulticast>
+    </General>
+    <Discovery>
+      <Peers>
+        <Peer address="10.0.0.2"/>  <!-- car -->
+        <Peer address="10.0.0.3"/>  <!-- PC -->
+      </Peers>
+      <ParticipantIndex>auto</ParticipantIndex>
+      <!-- default 9 is too few: the car's stack runs ~30 ROS processes -->
+      <MaxAutoParticipantIndex>120</MaxAutoParticipantIndex>
+    </Discovery>
+  </Domain>
+</CycloneDDS>

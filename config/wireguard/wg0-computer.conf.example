@@ -1,0 +1,11 @@
+# /etc/wireguard/wg0.conf on the computer (dials the car)
+[Interface]
+Address = 10.0.0.3/24
+PrivateKey = <computer private key>
+
+[Peer]
+# car
+PublicKey = <car public key>
+AllowedIPs = 10.0.0.2/32
+Endpoint = <car WiFi address>:51820
+PersistentKeepalive = 25

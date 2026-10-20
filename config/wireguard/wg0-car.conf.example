@@ -1,0 +1,15 @@
+# /etc/wireguard/wg0.conf on the car (listens). Keys: wg genkey | tee private.key | wg pubkey
+# Jetson: also install wireguard-go and add the systemd drop-in
+#   /etc/systemd/system/wg-quick@wg0.service.d/userspace.conf:
+#     [Service]
+#     Environment=WG_QUICK_USERSPACE_IMPLEMENTATION=wireguard
+[Interface]
+Address = 10.0.0.2/24
+PrivateKey = <car private key>
+ListenPort = 51820
+
+[Peer]
+# computer
+PublicKey = <computer public key>
+AllowedIPs = 10.0.0.3/32
+PersistentKeepalive = 25
